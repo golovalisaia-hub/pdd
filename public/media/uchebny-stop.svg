@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 352" role="img">
+  <defs>
+    <linearGradient id="ground" x2="1" y2="1"><stop stop-color="#20252a"/><stop offset="1" stop-color="#12171c"/></linearGradient>
+    <linearGradient id="road" x2="0" y2="1"><stop stop-color="#41434a"/><stop offset="1" stop-color="#24252b"/></linearGradient>
+    <pattern id="grit" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="3" cy="6" r=".55" fill="#fff" opacity=".12"/><circle cx="11" cy="11" r=".5" fill="#fff" opacity=".08"/></pattern>
+    <filter id="shadow"><feDropShadow dx="0" dy="5" stdDeviation="7" flood-opacity=".5"/></filter>
+  </defs>
+  <rect width="840" height="352" fill="url(#ground)"/>
+  <path d="M0 46h840v133H521c-19 0-34 16-34 36v137H353V215c0-20-15-36-34-36H0Z" fill="#828085"/>
+  <path d="M0 54h840v117H521c-24 0-42 19-42 44v137H361V215c0-25-18-44-42-44H0Z" fill="url(#road)"/>
+  <path d="M0 54h840v117H521c-24 0-42 19-42 44v137H361V215c0-25-18-44-42-44H0Z" fill="url(#grit)"/>
+  <path d="M0 112h840M420 209v143" fill="none" stroke="#c0bfb8" stroke-width="3" stroke-dasharray="19 16" opacity=".74"/>
+  <path d="M424 207h53" stroke="#fff6df" stroke-width="6"/>
+  <g fill="#344047" opacity=".85"><circle cx="155" cy="239" r="28"/><circle cx="193" cy="266" r="29"/><circle cx="79" cy="305" r="38"/><circle cx="725" cy="240" r="43"/><circle cx="780" cy="282" r="28"/><circle cx="691" cy="300" r="26"/></g>
+  <g transform="translate(449 273)" filter="url(#shadow)">
+    <rect x="-16" y="-32" width="32" height="64" rx="12" fill="#ff8147" stroke="#ffd0a6" stroke-width="1"/>
+    <path d="M-11-15h22l-3 11H-8Z" fill="#313742"/>
+    <rect x="-10" y="2" width="20" height="13" rx="4" fill="#d95b29"/>
+    <path d="M-10 19h20l-3 6H-7Z" fill="#3c3033"/>
+    <path d="M-11-26h5m12 0h5" stroke="#fff7dc" stroke-width="3" stroke-linecap="round"/>
+    <path d="M-11 27h5m12 0h5" stroke="#9d252c" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(529 213)" filter="url(#shadow)">
+    <path d="M0 16v43" stroke="#85898f" stroke-width="6"/>
+    <path d="M-14-33h28l19 19v28L14 33h-28l-19-19v-28z" fill="#dd3436" stroke="#fff" stroke-width="3"/>
+    <text x="0" y="7" fill="white" font-family="Arial,sans-serif" font-size="18" font-weight="700" text-anchor="middle">STOP</text>
+  </g>
+  <path d="M120 139h71m-10-8 10 8-10 8M697 83h-71m10-8-10 8 10 8" stroke="#bdc1c6" stroke-width="2" fill="none" opacity=".5"/>
+</svg>
