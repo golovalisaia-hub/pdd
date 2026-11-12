@@ -40,7 +40,10 @@ export default function StudyPage(props: Props) {
   const locked = useRef(false)
   const [busy, setBusy] = useState(false)
   const current = useRef({ id: question?.id, since: Date.now() })
-  useEffect(() => { current.current = { id: question?.id, since: Date.now() } }, [question?.id])
+  useEffect(() => {
+    current.current = { id: question?.id, since: Date.now() }
+    window.scrollTo(0, 0)
+  }, [question?.id])
   useEffect(() => {
     if (!completed && study.deadline !== undefined && now >= study.deadline) onFinish()
   }, [now, study.deadline, completed, onFinish])
@@ -60,9 +63,11 @@ export default function StudyPage(props: Props) {
 
   useQuestionKeys(select, () => move(-1), () => move(1))
 
-  if (!question) return <Empty title="Сессия недоступна" text="Откройте билет из установленного комплекта."><a className="button button--primary" href="#/bilety">К билетам</a></Empty>
+  const practice = study.kind === 'practice'
+  const ticketsHref = practice ? '#/bilety?komplekt=uchebny' : '#/bilety'
+  if (!question) return <Empty title="Сессия недоступна" text="Откройте билет из установленного комплекта."><a className="button button--primary" href={ticketsHref}>К билетам</a></Empty>
   if (completed) return <div className="screen-stack result-wrap">
-    <BackLink href="#/bilety">Билеты</BackLink>
+    <BackLink href={ticketsHref}>Билеты</BackLink>
     <section className="panel result-panel">
       <span className="result-icon"><CircleCheck size={34} /></span>
       <p className="data-label">{study.name}</p>
@@ -74,11 +79,11 @@ export default function StudyPage(props: Props) {
         { label: 'Точность', value: percent(result.correct, result.attempted) + '%' },
         { label: 'Время ответов', value: durationText(result.duration) },
       ]} />
-      {result.topics.length > 0 && <div className="result-topics"><h2>Темы для повторения</h2>{result.topics.map(topic => <a className="data-label" key={topic} href={'#/temy?tema=' + encodeURIComponent(topic)}>{topic}</a>)}</div>}
+      {result.topics.length > 0 && <div className="result-topics"><h2>Темы для повторения</h2>{result.topics.map(topic => <a className="data-label" key={topic} href={'#/temy?tema=' + encodeURIComponent(topic) + (practice ? '&komplekt=uchebny' : '')}>{topic}</a>)}</div>}
       <div className="inline-actions result-actions">
         {result.incorrect.length > 0 && <Button onClick={() => onReview(result.incorrect)}>Повторить ошибки</Button>}
         {onNextTicket && <Button variant="primary" onClick={onNextTicket}>Следующий билет <ArrowRight size={17} /></Button>}
-        {!onNextTicket && <a href="#/bilety" className="button button--primary">К билетам <ArrowRight size={17} /></a>}
+        {!onNextTicket && <a href={ticketsHref} className="button button--primary">К билетам <ArrowRight size={17} /></a>}
       </div>
     </section>
   </div>
@@ -86,7 +91,7 @@ export default function StudyPage(props: Props) {
   const response = study.responses[question.id]
   const nextUnanswered = items.findIndex(item => !study.responses[item.id])
   return <div className="screen-stack study-page">
-    <BackLink href="#/bilety">Билеты</BackLink>
+    <BackLink href={ticketsHref}>Билеты</BackLink>
     <div className="session-heading">
       <div><span className="data-label">{study.kind === 'official' ? 'Официальный комплект ABM' : 'Авторская практика'}</span><h1>{study.name}</h1></div>
       {study.deadline && <div className="timer-pill" aria-label="Осталось времени"><Timer size={19} />{clockText(study.deadline - now)}</div>}

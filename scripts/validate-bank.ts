@@ -10,6 +10,7 @@ import {
   ABM_QUESTION_COUNT,
   ABM_TICKETS,
   abmAnswerIndex,
+  abmEditionDate,
   abmPosition,
   abmQuestionId,
   abmText,
@@ -27,7 +28,7 @@ export const ABM_ASSET_DIR = ABM_ASSET_URL.slice(1)
 const keySchema = z.strictObject({
   category: z.literal('ABM', { error: 'Ожидается ключ для категории ABM.' }),
   version: abmText,
-  editionDate: z.iso.date({ error: 'Укажите действительную дату редакции в формате ГГГГ-ММ-ДД.' }),
+  editionDate: abmEditionDate,
   source: abmText,
   answers: z.array(z.strictObject({
     ticket: abmTicket,
@@ -66,7 +67,7 @@ export async function readAbmAnswerKey(file: string) {
 type ComparableBank = {
   source: string
   version: string
-  provenance: { editionDate: string }
+  provenance: { editionDate: string | null }
   questions: Array<{ ticket: number; position: number; correct: number; options: string[]; image?: string }>
 }
 

@@ -29,7 +29,9 @@ function WeeklyChart({ progress, bank }: { progress: Progress; bank: Bank }) {
   </section>
 }
 
-export default function ProgressPage({ progress, bank, studied, mastered }: { progress: Progress; bank: Bank; studied: number; mastered: number }) {
+export default function ProgressPage({ progress, bank, studied, mastered, officialAvailable }: {
+  progress: Progress; bank: Bank; studied: number; mastered: number; officialAvailable: boolean
+}) {
   const summary = learningSummary(bank.questions, progress.attempts)
   const coverage = percent(studied, 800)
   const tickets = ticketStates('official', progress)
@@ -39,6 +41,8 @@ export default function ProgressPage({ progress, bank, studied, mastered }: { pr
   const average = exams.length ? durationText(exams.reduce((sum, item) => sum + item.duration, 0) / exams.length) : '—'
   const junctionCorrect = new Set(progress.junctions.filter(item => item.correct).map(item => item.scenarioId)).size
   const topics = weakTopics(bank.questions, progress.attempts).slice(0, 5)
+  const practice = bank.kind === 'practice'
+  const bankQuery = practice ? '?komplekt=uchebny' : ''
   const metrics = [
     { name: 'Точность ответов', value: summary.attempts ? summary.accuracy + '%' : '—', icon: Target },
     { name: 'Верно с первого раза', value: summary.studied ? summary.firstAccuracy + '%' : '—', icon: TrendingUp },
@@ -48,6 +52,10 @@ export default function ProgressPage({ progress, bank, studied, mastered }: { pr
 
   return <div className="screen-stack">
     <PageTitle title="Прогресс" description="Следи за охватом вопросов и результатами занятий." />
+    {officialAvailable && <nav className="toolbar bank-picker" aria-label="Комплект для статистики">
+      <a className="button button--secondary" href="#/progress" aria-current={!practice ? 'page' : undefined}>Комплект ABM</a>
+      <a className="button button--secondary" href="#/progress?komplekt=uchebny" aria-current={practice ? 'page' : undefined}>Авторская практика</a>
+    </nav>}
     <div className="progress-overview">
       <section className="panel progress-cover">
         <div className="panel-head"><h2>Охват ABM</h2><BookOpenCheck size={20} /></div>
@@ -57,7 +65,7 @@ export default function ProgressPage({ progress, bank, studied, mastered }: { pr
         <p><strong>{mastered}</strong> освоено · <strong>{completed}</strong> из 40 билетов завершено</p>
       </section>
       <div className="progress-right">
-        {bank.kind === 'practice' && <div className="practice-progress"><span className="icon-box"><BookOpenCheck size={20} /></span><span><b>Авторская практика</b><small>Отдельно от охвата ABM</small></span><strong>{summary.studied} из 40</strong></div>}
+        {practice && <div className="practice-progress"><span className="icon-box"><BookOpenCheck size={20} /></span><span><b>Авторская практика</b><small>Отдельно от охвата ABM</small></span><strong>{summary.studied} из 40</strong></div>}
         <div className="metric-grid">{metrics.map(({ name, value, icon: Icon }) => <section className="panel stat-card" key={name}><Icon size={20} /><strong>{value}</strong><span>{name}</span></section>)}</div>
       </div>
     </div>
@@ -66,9 +74,9 @@ export default function ProgressPage({ progress, bank, studied, mastered }: { pr
       <section className="panel chart-panel">
         <div className="panel-head"><h2>Темы для повторения</h2><Target size={20} /></div>
         {topics.length ? <ul className="weak-topics">{topics.map(item => <li key={item.name}>
-          <a href={'#/temy?tema=' + encodeURIComponent(item.name)}><span>{item.name}</span><strong>{item.wrong}</strong><ArrowUpRight size={15} /></a>
+          <a href={'#/temy?tema=' + encodeURIComponent(item.name) + (practice ? '&komplekt=uchebny' : '')}><span>{item.name}</span><strong>{item.wrong}</strong><ArrowUpRight size={15} /></a>
         </li>)}</ul> : <p className="chart-empty">После ответов здесь появятся темы, в которых встречаются ошибки.</p>}
-        <a className="text-link" href="#/oshibki">Работа над ошибками <ArrowUpRight size={16} /></a>
+        <a className="text-link" href={'#/oshibki' + bankQuery}>Работа над ошибками <ArrowUpRight size={16} /></a>
       </section>
     </div>
     <section className="panel progress-ticket-panel">
@@ -86,7 +94,7 @@ export default function ProgressPage({ progress, bank, studied, mastered }: { pr
           <div><strong className={item.passed ? 'positive' : 'negative'}>{item.passed ? 'Сдал' : 'Не сдал'}</strong><small>{item.kind === 'official' ? 'ABM' : 'Учебный'} · {shortDate(item.at)}</small></div>
           <span>{item.correct} верно · {durationText(item.duration)}</span>
         </li>)}</ul> : <p className="chart-empty">Завершённые попытки появятся здесь.</p>}
-        <a className="text-link" href="#/ekzamen">К экзамену <ArrowUpRight size={16} /></a>
+        <a className="text-link" href={'#/ekzamen' + bankQuery}>К экзамену <ArrowUpRight size={16} /></a>
       </section>
       <section className="panel chart-panel junction-stats">
         <div className="panel-head"><h2>Перекрёстки</h2><Route size={20} /></div>

@@ -54,7 +54,8 @@ export default function SettingsPage({ official, bankStatus }: { official?: Offi
         <span className="icon-box icon-box--amber"><Database size={22} /></span>
         <h2>Комплект ABM</h2>
         {official ? <>
-          <p>Проверено {official.questions.length} позиций · редакция {official.provenance.editionDate}</p>
+          <p>Проверено {official.questions.length} позиций · сверено {official.provenance.checkedAt}</p>
+          {official.provenance.editionDate && <p>Дата редакции {official.provenance.editionDate}</p>}
           <p>Издатель: {official.provenance.publisher}. Версия: {official.version}.</p>
           <a href={official.source} className="text-link" target="_blank" rel="noreferrer">Источник комплекта <ArrowUpRight size={16} /></a>
         </> : <>

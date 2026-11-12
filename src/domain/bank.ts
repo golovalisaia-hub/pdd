@@ -20,6 +20,7 @@ export const abmSourceUrl = z.url({ protocol: /^https$/, error: 'Укажите 
 export const abmTicket = z.number().int().min(1).max(ABM_TICKETS)
 export const abmPosition = z.number().int().min(1).max(ABM_QUESTIONS_PER_TICKET)
 export const abmAnswerIndex = z.number().int().min(0).max(4)
+export const abmEditionDate = z.iso.date({ error: 'Укажите действительную дату редакции в формате ГГГГ-ММ-ДД.' }).nullable()
 
 const questionContent = z.strictObject({
   ticket: abmTicket,
@@ -57,7 +58,7 @@ export type Bank = {
 
 const provenanceFields = z.strictObject({
   publisher: abmText,
-  editionDate: z.iso.date({ error: 'Укажите действительную дату редакции в формате ГГГГ-ММ-ДД.' }),
+  editionDate: abmEditionDate,
   checkedAt: z.iso.date({ error: 'Укажите действительную дату проверки в формате ГГГГ-ММ-ДД.' }),
   rights: z.strictObject({ terms: abmText, evidence: abmText }),
 })
@@ -118,7 +119,7 @@ export function parseAbmJson<T extends z.ZodType>(schema: T, input: unknown): z.
 }
 
 function checkAbmQuestions(bank: z.infer<typeof sourceBank> | OfficialBank): void {
-  if (bank.provenance.checkedAt < bank.provenance.editionDate) {
+  if (bank.provenance.editionDate !== null && bank.provenance.checkedAt < bank.provenance.editionDate) {
     throw new Error('Дата проверки предшествует дате редакции.')
   }
 

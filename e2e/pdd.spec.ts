@@ -16,6 +16,7 @@ test('главная, билеты, иллюстрация, обучение и 
   await page.getByRole('link', { name: 'Билеты', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Билеты', exact: true })).toBeVisible()
   await capture(page, info, '02-bilety.png')
+  await page.goto('./#/bilety?komplekt=uchebny')
   await page.getByRole('button', { name: 'Учебный билет 1', exact: true }).click()
   await expect(page.getByText('Вопрос 1 из 20', { exact: true })).toBeVisible()
   await capture(page, info, '03-vopros.png', '.question-content')
@@ -30,13 +31,14 @@ test('главная, билеты, иллюстрация, обучение и 
   await expect(page.getByText('Верно!', { exact: true })).toBeVisible()
   await page.getByRole('link', { name: 'Прогресс', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Прогресс', exact: true })).toBeVisible()
+  await page.goto('./#/progress?komplekt=uchebny')
   await expect(page.getByText('1 из 40', { exact: true })).toBeVisible()
   await capture(page, info, '06-progress.png')
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth))
 })
 
 test('экзамен подтверждает ответ и восстанавливает время после обновления', async ({ page }, info) => {
-  await page.goto('./#/ekzamen')
+  await page.goto('./#/ekzamen?komplekt=uchebny')
   await page.getByRole('button', { name: 'Начать экзамен', exact: true }).click()
   const time = page.getByTestId('exam-timer')
   await expect(time).toBeVisible()
@@ -94,14 +96,14 @@ test('приложение и PWA используют один путь и от
   await expect(page.getByRole('heading', { name: 'Справочник ПДД', exact: true })).toBeVisible()
   await page.goto('./#/perekrestki')
   await expect(page.getByRole('heading', { name: 'Перекрёстки', exact: true })).toBeVisible()
-  await page.getByRole('link', { name: 'Билеты', exact: true }).click()
+  await page.goto('./#/bilety?komplekt=uchebny')
   await page.getByRole('button', { name: 'Учебный билет 1', exact: true }).click()
   await expect(page.getByRole('img', { name: 'Иллюстрация к вопросу' })).toBeVisible()
   await expect.poll(() => page.getByRole('img', { name: 'Иллюстрация к вопросу' }).evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
 })
 
 test('завершает билет, находит ошибки и открывает повторение', async ({ page }) => {
-  await page.goto('./#/bilety')
+  await page.goto('./#/bilety?komplekt=uchebny')
   await page.getByRole('button', { name: 'Учебный билет 1', exact: true }).click()
   const ticket = practiceBank.questions.filter(question => question.ticket === 1)
   for (const [i, question] of ticket.entries()) {
@@ -112,7 +114,7 @@ test('завершает билет, находит ошибки и открыв
   }
   await expect(page.getByRole('heading', { name: 'Занятие завершено' })).toBeVisible()
   await expect(page.getByText('95%', { exact: true })).toBeVisible()
-  await page.goto('./#/oshibki')
+  await page.goto('./#/oshibki?komplekt=uchebny')
   await expect(page.getByText(ticket[0].text, { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Повторить ошибки', exact: true }).click()
   await expect(page.getByText('Вопрос 1 из 1', { exact: true })).toBeVisible()
@@ -120,8 +122,8 @@ test('завершает билет, находит ошибки и открыв
 
 test('заканчивает короткую тренировку по таймеру', async ({ page }) => {
   await page.clock.install()
-  await page.goto('./')
-  await page.getByRole('button', { name: 'Начать тренировку', exact: true }).click()
+  await page.goto('./#/bilety?komplekt=uchebny')
+  await page.getByRole('button', { name: 'Тренировка на 10 минут', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Тренировка на 10 минут' })).toBeVisible()
   await page.getByRole('button', { name: 'Перед стоп-линией.', exact: true }).click()
   await expect(page.getByText('Верно!', { exact: true })).toBeVisible()
@@ -131,7 +133,7 @@ test('заканчивает короткую тренировку по тайм
 })
 
 test('скачивает и повторно импортирует резервную копию из настроек', async ({ page }) => {
-  await page.goto('./#/bilety')
+  await page.goto('./#/bilety?komplekt=uchebny')
   await page.getByRole('button', { name: 'Учебный билет 1', exact: true }).click()
   await page.getByRole('button', { name: 'Перед стоп-линией.', exact: true }).click()
   await expect(page.getByText('Верно!', { exact: true })).toBeVisible()
@@ -145,6 +147,6 @@ test('скачивает и повторно импортирует резерв
   await page.getByRole('button', { name: 'Импорт', exact: true }).click()
   await (await chooser).setFiles({ name: download.suggestedFilename(), mimeType: 'application/json', buffer: payload })
   await expect(page.getByText('Прогресс объединён с данными на этом устройстве.')).toBeVisible()
-  await page.getByRole('link', { name: 'Прогресс', exact: true }).click()
+  await page.goto('./#/progress?komplekt=uchebny')
   await expect(page.getByText('1 из 40', { exact: true })).toBeVisible()
 })

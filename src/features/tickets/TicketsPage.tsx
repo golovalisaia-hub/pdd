@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { ArrowUpRight, BookOpen, Check, LockKeyhole, Search } from 'lucide-react'
-import { PageTitle, Track } from '../../components/ui'
+import { ArrowRight, ArrowUpRight, BookOpen, Check, LockKeyhole, Search } from 'lucide-react'
+import { Button, PageTitle, Track } from '../../components/ui'
 import { ABM_TICKETS, abmQuestionId } from '../../domain/abm-positions'
 import type { Bank } from '../../domain/bank'
 import { practiceBank } from '../../domain/practice-bank'
@@ -35,7 +35,10 @@ function TicketCard({ ticket, kind, available, onOpen }: { ticket: Ticket; kind:
   </button>
 }
 
-export default function TicketsPage({ official, progress, onStart }: { official?: Bank; progress: Progress; onStart: (bank: Bank, ticket: number) => void }) {
+export default function TicketsPage({ official, practiceSelected, progress, ready, onStart, onPractice }: {
+  official?: Bank; practiceSelected: boolean; progress: Progress; ready: boolean
+  onStart: (bank: Bank, ticket: number) => void; onPractice: () => void
+}) {
   const [filter, setFilter] = useState('all')
   const [number, setNumber] = useState('')
   const tickets = useMemo(() => ticketStates('official', progress), [progress])
@@ -43,28 +46,37 @@ export default function TicketsPage({ official, progress, onStart }: { official?
     (filter === 'all' || (filter === 'working' && ticket.state === 'working') || (filter === 'done' && ['mastered', 'done'].includes(ticket.state))))
   return <div className="screen-stack">
     <PageTitle title="Билеты" description="Проходи вопросы по порядку и разбирай каждый ответ." />
-    {!official && <section className="panel data-notice">
-      <span className="icon-box icon-box--amber"><BookOpen size={21} /></span>
-      <div><h2>Авторская практика</h2><p>Два учебных билета по ПДД. Официальный комплект можно добавить отдельно.</p></div>
-      <a className="text-link" href="#/nastroyki">О комплекте <ArrowUpRight size={15} /></a>
-    </section>}
-    {!official && <div className="practice-ticket-grid">
-      {ticketStates('practice', progress).map(ticket => <TicketCard key={ticket.number} ticket={ticket} kind="practice" available onOpen={() => onStart(practiceBank, ticket.number)} />)}
-    </div>}
-    <div className="section-heading"><div><h2>Официальные билеты ABM</h2><p>40 билетов · 20 вопросов в каждом</p></div></div>
-    {official && <div className="toolbar">
-      <div className="segmented" aria-label="Статус билета">
-        {[['all', 'Все'], ['working', 'В процессе'], ['done', 'Завершённые']].map(([value, label]) =>
-          <button type="button" key={value} aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}</button>)}
+    {official && <nav className="toolbar bank-picker" aria-label="Комплект билетов">
+      <a className="button button--secondary" href="#/bilety" aria-current={!practiceSelected ? 'page' : undefined}>Комплект ABM</a>
+      <a className="button button--secondary" href="#/bilety?komplekt=uchebny" aria-current={practiceSelected ? 'page' : undefined}>Авторская практика</a>
+    </nav>}
+    {(practiceSelected || !official) && <>
+      <section className="panel data-notice">
+        <span className="icon-box icon-box--amber"><BookOpen size={21} /></span>
+        <div><h2>Авторская практика</h2><p>40 авторских вопросов в двух учебных билетах.</p></div>
+        {!official && <a className="text-link" href="#/nastroyki">О комплекте ABM <ArrowUpRight size={15} /></a>}
+      </section>
+      <div className="practice-ticket-grid">
+        {ticketStates('practice', progress).map(ticket => <TicketCard key={ticket.number} ticket={ticket} kind="practice" available onOpen={() => onStart(practiceBank, ticket.number)} />)}
       </div>
-      <label className="search-input"><Search size={18} /><input type="search" inputMode="numeric" placeholder="Номер билета" aria-label="Номер билета" value={number} onChange={event => setNumber(event.target.value)} /></label>
-    </div>}
-    <div className="ticket-grid">
-      {filtered.map(ticket => <TicketCard key={ticket.number} ticket={ticket} kind="official" available={Boolean(official)} onOpen={() => { if (official) onStart(official, ticket.number) }} />)}
-    </div>
-    {filtered.length === 0 && <p className="notice">Билетов с такими параметрами нет.</p>}
-    {official && <section><h2 className="section-title">Авторская практика</h2><div className="practice-ticket-grid">
-      {ticketStates('practice', progress).map(ticket => <TicketCard key={ticket.number} ticket={ticket} kind="practice" available onOpen={() => onStart(practiceBank, ticket.number)} />)}
-    </div></section>}
+      <div className="inline-actions">
+        <Button variant="primary" disabled={!ready} onClick={onPractice}>Тренировка на 10 минут <ArrowRight size={17} /></Button>
+        <a className="button button--secondary" href="#/ekzamen?komplekt=uchebny">Учебный экзамен</a>
+      </div>
+    </>}
+    {!practiceSelected && <>
+      <div className="section-heading"><div><h2>Официальные билеты ABM</h2><p>40 билетов · 20 вопросов в каждом</p></div></div>
+      {official && <div className="toolbar">
+        <div className="segmented" aria-label="Статус билета">
+          {[['all', 'Все'], ['working', 'В процессе'], ['done', 'Завершённые']].map(([value, label]) =>
+            <button type="button" key={value} aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}</button>)}
+        </div>
+        <label className="search-input"><Search size={18} /><input type="search" inputMode="numeric" placeholder="Номер билета" aria-label="Номер билета" value={number} onChange={event => setNumber(event.target.value)} /></label>
+      </div>}
+      <div className="ticket-grid">
+        {filtered.map(ticket => <TicketCard key={ticket.number} ticket={ticket} kind="official" available={Boolean(official)} onOpen={() => { if (official) onStart(official, ticket.number) }} />)}
+      </div>
+      {filtered.length === 0 && <p className="notice">Билетов с такими параметрами нет.</p>}
+    </>}
   </div>
 }

@@ -97,15 +97,15 @@ function Pdd() {
     start(source, source.questions.filter(question => question.ticket === number), 'ticket', (source.kind === 'practice' ? 'Учебный билет ' : 'Билет ') + number, number)
   }
 
-  function startPractice() {
-    start(primary, choosePractice(primary.questions, progress.attempts, Date.now()), 'practice', 'Тренировка на 10 минут')
+  function startPractice(source: Bank) {
+    start(source, choosePractice(source.questions, progress.attempts, Date.now()), 'practice', 'Тренировка на 10 минут')
   }
 
   function resume() {
     if (study && studyBank?.version === study.version && study.completedAt === undefined) { go('trening'); return }
     const next = ticketStates(primary.kind, progress).find(item => item.state === 'working' || item.state === 'new')
     if (next) startTicket(primary, next.number)
-    else startPractice()
+    else startPractice(primary)
   }
 
   function showRule(rule: string) {
@@ -113,11 +113,14 @@ function Pdd() {
   }
 
   const collectionMode = route.path === 'oshibki' ? 'errors' : route.path === 'izbrannoe' ? 'favorites' : 'topics'
+  const practiceSelected = route.params.get('komplekt') === 'uchebny'
+  const selectedBank = practiceSelected ? practiceBank : primary
 
   let screen: ReactNode
   switch (route.path) {
     case 'bilety':
-      screen = <TicketsPage official={official.bank} progress={progress} onStart={startTicket} />
+      screen = <TicketsPage official={official.bank} practiceSelected={practiceSelected} progress={progress} ready={Boolean(stored)}
+        onStart={startTicket} onPractice={() => startPractice(practiceBank)} />
       break
     case 'trening': {
       const itemsById = new Map(studyBank?.questions.map(item => [item.id, item]))
@@ -144,7 +147,7 @@ function Pdd() {
       break
     }
     case 'ekzamen':
-      screen = <ExamPage key={exam?.id ?? 'intro'} bank={primary} state={exam} loaded={Boolean(stored) && official.status !== 'loading'} officialAvailable={Boolean(official.bank)}
+      screen = <ExamPage key={exam?.id ?? 'intro'} bank={selectedBank} state={exam} loaded={Boolean(stored) && official.status !== 'loading'} officialAvailable={Boolean(official.bank)}
         onStart={kind => {
           const source = kind === 'official' ? official.bank : practiceBank
           if (source) void save(() => updateExam(db, current => current && current.phase !== 'done' ? expireExam(current, Date.now()) : createExam(source, crypto.randomUUID(), Date.now())))
@@ -161,19 +164,18 @@ function Pdd() {
       screen = <JunctionsPage completedIds={junctionDone} onRule={showRule} onAttempt={(scenarioId, correct) => void save(() => db.junctions.add({ id: crypto.randomUUID(), scenarioId, correct, at: Date.now() }))} />
       break
     case 'progress':
-      screen = <ProgressPage progress={progress} bank={primary} studied={studied} mastered={mastered} />
+      screen = <ProgressPage progress={progress} bank={selectedBank} studied={studied} mastered={mastered} officialAvailable={Boolean(official.bank)} />
       break
     case 'oshibki':
     case 'izbrannoe':
     case 'temy': {
-      const selected = official.bank && route.params.get('komplekt') !== 'uchebny' ? official.bank : practiceBank
       screen = <>
         {official.bank && <div className="toolbar bank-toggle">
-          <a className={'data-label ' + (selected.kind === 'official' ? 'data-label--selected' : '')} href={'#/' + route.path}>Комплект ABM</a>
-          <a className={'data-label ' + (selected.kind === 'practice' ? 'data-label--selected' : '')} href={'#/' + route.path + '?komplekt=uchebny'}>Учебные вопросы</a>
+          <a className={'data-label ' + (selectedBank.kind === 'official' ? 'data-label--selected' : '')} href={'#/' + route.path}>Комплект ABM</a>
+          <a className={'data-label ' + (selectedBank.kind === 'practice' ? 'data-label--selected' : '')} href={'#/' + route.path + '?komplekt=uchebny'}>Учебные вопросы</a>
         </div>}
-        <CollectionsPage bank={selected} progress={progress} mode={collectionMode} selectedTopic={route.params.get('tema')}
-          onStart={(items, name) => start(selected, items, 'review', name)} />
+        <CollectionsPage bank={selectedBank} progress={progress} mode={collectionMode} selectedTopic={route.params.get('tema')}
+          onStart={(items, name) => start(selectedBank, items, 'review', name)} />
       </>
       break
     }
@@ -185,7 +187,7 @@ function Pdd() {
       screen = <SettingsPage official={official.bank} bankStatus={official.status} />
       break
     default:
-      screen = <HomePage progress={progress} bank={primary} studied={studied} mastered={mastered} ready={Boolean(stored) && official.status !== 'loading'} onContinue={resume} onPractice={startPractice} />
+      screen = <HomePage progress={progress} bank={primary} studied={studied} mastered={mastered} ready={Boolean(stored) && official.status !== 'loading'} onContinue={resume} onPractice={() => startPractice(primary)} />
   }
 
   return <div className="app-shell">

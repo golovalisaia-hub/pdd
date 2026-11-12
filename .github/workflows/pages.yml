@@ -32,7 +32,7 @@ jobs:
       - name: Запустить тесты
         run: npm test
       - name: Проверить комплект вопросов
-        run: npm run validate:bank
+        run: npm run validate:bank -- --answers data/abm/answers.json
       - name: Получить путь сайта
         id: pages
         uses: actions/configure-pages@v5

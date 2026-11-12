@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, BookOpen, Check, CircleCheck, CircleX, ClipboardCheck, Flag, Layers3, Timer } from 'lucide-react'
 import { motion } from 'motion/react'
 import { BackLink, Button, Dialog, Illustration, PageTitle, RuleLinks, Track, clockText, durationText } from '../../components/ui'
@@ -21,7 +21,7 @@ const reasons: Record<ExamReason, string> = {
   quit: 'Экзамен завершён досрочно.',
 }
 
-function Intro({ bank, loaded, onStart }: Pick<Props, 'bank' | 'loaded' | 'onStart'>) {
+function Intro({ bank, loaded, officialAvailable, onStart }: Pick<Props, 'bank' | 'loaded' | 'officialAvailable' | 'onStart'>) {
   const details = [
     { icon: ClipboardCheck, label: '20 вопросов', text: 'Четыре блока по пять вопросов.' },
     { icon: Timer, label: '20 минут', text: 'Таймер продолжает идти при перезагрузке.' },
@@ -29,6 +29,10 @@ function Intro({ bank, loaded, onStart }: Pick<Props, 'bank' | 'loaded' | 'onSta
   ]
   return <div className="screen-stack">
     <PageTitle title="Экзамен" description="Проверь себя в условиях теоретического экзамена." />
+    {officialAvailable && <nav className="toolbar bank-picker" aria-label="Комплект экзамена">
+      <a className="button button--secondary" href="#/ekzamen" aria-current={bank.kind === 'official' ? 'page' : undefined}>Экзамен ABM</a>
+      <a className="button button--secondary" href="#/ekzamen?komplekt=uchebny" aria-current={bank.kind === 'practice' ? 'page' : undefined}>Учебный экзамен</a>
+    </nav>}
     <section className="panel exam-intro">
       <div className="icon-box icon-box--amber"><ClipboardCheck size={25} /></div>
       <div><h2>{bank.kind === 'official' ? 'Экзамен ABM' : 'Учебный экзамен'}</h2><p>{bank.kind === 'official' ? 'Вопросы из подключённого официального комплекта.' : 'Авторские вопросы по формату экзамена ГИБДД.'}</p></div>
@@ -91,7 +95,7 @@ function Result({ state, onStart, officialAvailable, loaded }: Pick<Props, 'onSt
       {!canRepeat && <p>{loaded ? 'Для повторения нужен подключённый комплект ABM.' : 'Проверяем официальный комплект…'}</p>}
       <div className="inline-actions result-actions">
         {canRepeat && <Button variant="primary" onClick={() => onStart(state.kind)}>Повторить экзамен <ArrowRight size={17} /></Button>}
-        {loaded && state.kind === 'official' && !canRepeat && <Button onClick={() => onStart('practice')}>Учебный экзамен</Button>}
+        {loaded && state.kind === 'official' && <Button onClick={() => onStart('practice')}>Учебный экзамен</Button>}
         {state.kind === 'practice' && officialAvailable && <Button onClick={() => onStart('official')}>Экзамен ABM</Button>}
         <a className="button button--secondary" href={state.kind === 'practice' ? '#/oshibki?komplekt=uchebny' : '#/oshibki'}>Работа над ошибками</a>
       </div>
@@ -115,7 +119,11 @@ export default function ExamPage({ bank, state, loaded, officialAvailable, onSta
   const [quit, setQuit] = useState(false)
   const active = Boolean(state && state.phase !== 'done')
   const now = useClock(active)
-  if (!state) return <Intro bank={bank} loaded={loaded} onStart={onStart} />
+  const questionId = active ? state?.currentId : undefined
+  useEffect(() => {
+    if (questionId) window.scrollTo(0, 0)
+  }, [questionId])
+  if (!state) return <Intro bank={bank} loaded={loaded} officialAvailable={officialAvailable} onStart={onStart} />
   if (state.phase === 'done') return <Result state={state} onStart={onStart} officialAvailable={officialAvailable} loaded={loaded} />
   const items = examItems(state)
   const index = Math.max(0, items.findIndex(item => item.id === state.currentId))

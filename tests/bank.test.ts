@@ -154,6 +154,19 @@ async function withImportFiles(run: (files: {
 }
 
 describe('импорт и повторная проверка АВМ', () => {
+  it('сохраняет дату сверки, если издатель не указал дату редакции', async () => {
+    await withImportFiles(async ({ input, key, publicDir, pack, answers }) => {
+      await writeFile(input, JSON.stringify({ ...pack, provenance: { ...pack.provenance, editionDate: null } }))
+      await writeFile(key, JSON.stringify({ ...answers, editionDate: null }))
+
+      await importAbm({ input, answers: key, publicDir })
+      const bank = await validateAbm(publicDir, key)
+
+      expect(bank?.provenance.editionDate).toBeNull()
+      expect(bank?.provenance.checkedAt).toBe('2026-11-11')
+    })
+  })
+
   it('сохраняет комплект, проверенную иллюстрацию и контрольную сумму независимого ключа', async () => {
     await withImportFiles(async ({ root, input, key, publicDir, pack, answers, writeInputs }) => {
       pack.questions[0]!.image = 'example.png'
