@@ -43,14 +43,17 @@ test('подключённый комплект оставляет авторс�
   await expect(sources.getByRole('link', { name: 'Авторская практика' })).toBeVisible()
   await sources.getByRole('link', { name: 'Авторская практика' }).click()
 
-  await expect(page.getByRole('button', { name: /^Учебный билет \d+$/ })).toHaveCount(2)
+  await expect(page.getByRole('button', { name: /^Учебный билет \d+$/ })).toHaveCount(7)
+  await expect(page.getByText('140 вопросов · 7 учебных билетов', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Билет 40', exact: true })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Учебный экзамен', exact: true })).toBeVisible()
-  await page.getByRole('button', { name: 'Учебный билет 1', exact: true }).click()
-  const first = practiceBank.questions[0]
+  await page.getByRole('button', { name: 'Учебный билет 7', exact: true }).click()
+  const first = practiceBank.questions.find(question => question.ticket === 7 && question.position === 1)!
   await expect(page.getByRole('heading', { name: first.text })).toBeVisible()
   await page.getByRole('button', { name: first.options[first.correct], exact: true }).click()
   await expect(page.getByText('Верно!', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Объяснить проще', exact: true }).click()
+  await expect(page.getByText(first.simple!, { exact: true })).toBeVisible()
   await page.getByRole('main').getByRole('link', { name: 'Билеты', exact: true }).click()
   await expect(sources.getByRole('link', { name: 'Авторская практика' })).toHaveAttribute('aria-current', 'page')
 
@@ -61,7 +64,7 @@ test('подключённый комплект оставляет авторс�
   await page.getByRole('link', { name: 'Прогресс', exact: true }).click()
   await expect(page.getByLabel('0 из 800 официальных вопросов')).toBeVisible()
   await page.getByRole('navigation', { name: 'Комплект для статистики' }).getByRole('link', { name: 'Авторская практика' }).click()
-  await expect(page.getByText('1 из 40', { exact: true })).toBeVisible()
+  await expect(page.getByText('1 из 140', { exact: true })).toBeVisible()
 })
 
 test('можно выбрать оба экзамена после установки комплекта ABM', async ({ page }) => {

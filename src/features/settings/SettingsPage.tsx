@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight, Database, Download, FileJson, HardDrive, ShieldCheck, Smartphone, Upload, WifiOff } from 'lucide-react'
 import { Button, PageTitle } from '../../components/ui'
 import type { OfficialBank } from '../../domain/bank'
+import { practiceBank } from '../../domain/practice-bank'
 import { db } from '../../domain/storage'
 import { exportProgress, importProgress } from '../../domain/backup'
 
@@ -59,7 +60,7 @@ export default function SettingsPage({ official, bankStatus }: { official?: Offi
           <p>Издатель: {official.provenance.publisher}. Версия: {official.version}.</p>
           <a href={official.source} className="text-link" target="_blank" rel="noreferrer">Источник комплекта <ArrowUpRight size={16} /></a>
         </> : <>
-          <p>{bankStatus === 'loading' ? 'Проверяем локальный комплект.' : bankStatus === 'invalid' ? 'Файлы комплекта не прошли проверку.' : 'Официальный комплект пока не подключён. Доступны 40 авторских вопросов.'}</p>
+          <p>{bankStatus === 'loading' ? 'Проверяем локальный комплект.' : bankStatus === 'invalid' ? 'Файлы комплекта не прошли проверку.' : `Официальный комплект пока не подключён. Доступен авторский тренажёр на ${practiceBank.questions.length} вопросов.`}</p>
           <details><summary>Как подключить комплект</summary><div className="settings-detail">
             <p>Нужны разрешённый комплект на 800 позиций, изображения и ключ для сверки. Формат файлов описан в документации проекта.</p>
             <code>npm run import:abm -- --input … --answers … --assets …</code>

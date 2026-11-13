@@ -42,6 +42,7 @@ export default function ProgressPage({ progress, bank, studied, mastered, offici
   const junctionCorrect = new Set(progress.junctions.filter(item => item.correct).map(item => item.scenarioId)).size
   const topics = weakTopics(bank.questions, progress.attempts).slice(0, 5)
   const practice = bank.kind === 'practice'
+  const displayedTickets = practice ? ticketStates('practice', progress) : tickets
   const bankQuery = practice ? '?komplekt=uchebny' : ''
   const metrics = [
     { name: 'Точность ответов', value: summary.attempts ? summary.accuracy + '%' : '—', icon: Target },
@@ -65,7 +66,7 @@ export default function ProgressPage({ progress, bank, studied, mastered, offici
         <p><strong>{mastered}</strong> освоено · <strong>{completed}</strong> из 40 билетов завершено</p>
       </section>
       <div className="progress-right">
-        {practice && <div className="practice-progress"><span className="icon-box"><BookOpenCheck size={20} /></span><span><b>Авторская практика</b><small>Отдельно от охвата ABM</small></span><strong>{summary.studied} из 40</strong></div>}
+        {practice && <div className="practice-progress"><span className="icon-box"><BookOpenCheck size={20} /></span><span><b>Авторская практика</b><small>Изучено вопросов</small></span><strong>{summary.studied} из {bank.questions.length}</strong></div>}
         <div className="metric-grid">{metrics.map(({ name, value, icon: Icon }) => <section className="panel stat-card" key={name}><Icon size={20} /><strong>{value}</strong><span>{name}</span></section>)}</div>
       </div>
     </div>
@@ -80,8 +81,8 @@ export default function ProgressPage({ progress, bank, studied, mastered, offici
       </section>
     </div>
     <section className="panel progress-ticket-panel">
-      <div className="panel-head"><h2>40 билетов ABM</h2><a className="text-link" href="#/bilety">Открыть билеты <ArrowUpRight size={16} /></a></div>
-      <ol className="mini-tickets">{tickets.map(item => {
+      <div className="panel-head"><h2>{practice ? 'Учебные билеты' : '40 билетов ABM'}</h2><a className="text-link" href={'#/bilety' + bankQuery}>Открыть билеты <ArrowUpRight size={16} /></a></div>
+      <ol className="mini-tickets">{displayedTickets.map(item => {
         const label = { new: 'Не начат', working: 'В процессе', done: 'Завершён', mastered: 'Освоен' }[item.state]
         return <li key={item.number} className={'mini-ticket mini-ticket--' + item.state} title={'Билет ' + item.number + ' · ' + label} aria-label={'Билет ' + item.number + ', ' + label}>{item.number}</li>
       })}</ol>

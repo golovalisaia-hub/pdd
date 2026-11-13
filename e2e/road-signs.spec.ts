@@ -1,0 +1,32 @@
+import { expect, test } from '@playwright/test'
+
+test('показывает дорожные знаки с правильными номерами и загружает их без сети', async ({ page, context }, info) => {
+  await page.goto('./#/znaki')
+  await expect(page.getByRole('heading', { name: 'Дорожные знаки', exact: true })).toBeVisible()
+  const main = page.getByRole('main')
+  const images = main.locator('img[src*="/media/signs/"]')
+  await expect(images).toHaveCount(17)
+
+  const search = main.getByRole('searchbox')
+  await main.getByRole('combobox', { name: 'Группа знаков' }).selectOption('5')
+  await expect(images).toHaveCount(3)
+  await main.getByRole('combobox', { name: 'Группа знаков' }).selectOption('')
+  await search.fill('5.19.2')
+  await expect(images).toHaveCount(1)
+  await expect(images.first()).toHaveAttribute('src', /\/media\/signs\/5\.19\.2\.svg$/)
+  await expect.poll(() => images.first().evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0)
+  await expect(main.getByRole('heading', { name: 'Пешеходный переход', exact: true })).toBeVisible()
+  await search.clear()
+  await expect(images).toHaveCount(17)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth))
+  await page.screenshot({ path: info.outputPath('road-signs.png') })
+
+  await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller)), { timeout: 20_000 }).toBe(true)
+  await context.setOffline(true)
+  await page.reload()
+  await search.fill('3.28')
+  await expect(images).toHaveCount(1)
+  await expect(images.first()).toHaveAttribute('src', /\/media\/signs\/3\.28\.svg$/)
+  await expect.poll(() => images.first().evaluate((element: HTMLImageElement) => element.naturalWidth)).toBeGreaterThan(0)
+  await expect(main.getByRole('heading', { name: 'Стоянка запрещена', exact: true })).toBeVisible()
+})

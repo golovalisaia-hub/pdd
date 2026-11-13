@@ -30,4 +30,12 @@ describe('прогресс обучения', () => {
     expect(choosePractice(questions, history, now).map(question => question.topic)).toEqual(['Б', 'А', 'В'])
     expect(weakTopics(questions, []).length).toBe(0)
   })
+
+  it('перемешивает вопросы равного приоритета, сохраняя ошибки в начале подборки', () => {
+    const history = [attempt('1', questions[1].id, false)]
+    const ordered = [0.1, 0.8, 0.9].values()
+    const reversed = [0.9, 0.8, 0.1].values()
+    expect(choosePractice(questions, history, now, 2, () => ordered.next().value ?? 0)).toEqual([questions[1], questions[0]])
+    expect(choosePractice(questions, history, now, 2, () => reversed.next().value ?? 0)).toEqual([questions[1], questions[2]])
+  })
 })

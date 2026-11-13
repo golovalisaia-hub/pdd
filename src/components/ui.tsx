@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { motion } from 'motion/react'
 import { ArrowLeft, ArrowUpRight, BookOpen, Maximize2, Minus, Plus, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { normalizeRule, referenceByCode } from '../domain/reference'
+import { ruleLink } from '../domain/reference'
 import { publicAssetUrl } from '../publicAssetUrl'
 
 export function Button({ children, className = '', variant = 'secondary', ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'quiet' }) {
@@ -71,7 +71,7 @@ export function Illustration({ src }: { src: string }) {
   const url = publicAssetUrl(src)
   if (failed) return <p role="alert" className="notice">Иллюстрация не загрузилась. Проверьте файлы комплекта.</p>
   return <>
-    <button type="button" className="illustration" aria-label="Увеличить иллюстрацию" onClick={() => { setZoom(1); setOpen(true) }}>
+    <button type="button" className={'illustration' + (src.startsWith('/media/signs/') ? ' illustration--sign' : '')} aria-label="Увеличить иллюстрацию" onClick={() => { setZoom(1); setOpen(true) }}>
       <img src={url} alt="Иллюстрация к вопросу" decoding="async" onError={() => setFailed(true)} />
       <span className="image-expand"><Maximize2 size={17} /></span>
     </button>
@@ -89,9 +89,10 @@ export function Illustration({ src }: { src: string }) {
 export function RuleLinks({ rules }: { rules?: string[] }) {
   if (!rules?.length) return null
   return <div className="rule-links">{rules.map(code => {
-    const entry = referenceByCode(code)
-    return <a key={code} className="rule-link" href={'#/spravochnik?pravilo=' + encodeURIComponent(normalizeRule(code))}>
-      <BookOpen size={14} /> {entry?.group === 'Знаки' ? 'Знак ' : entry?.group === 'Разметка' ? 'Разметка ' : 'ПДД, п. '}{code}<ArrowUpRight size={13} />
+    const { label, href } = ruleLink(code)
+    const external = href.startsWith('https:')
+    return <a key={code} className="rule-link" href={href} target={external ? '_blank' : undefined} rel={external ? 'noreferrer' : undefined}>
+      <BookOpen size={14} /> {label}<ArrowUpRight size={13} />
     </a>
   })}</div>
 }

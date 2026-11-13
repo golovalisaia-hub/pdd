@@ -12,8 +12,45 @@ const specialSource = ruleSource + '367c97a177672081a40df5256f7b2150d8ff81c6/'
 const crossingSource = ruleSource + '7c45508e360f5b7b8ae1443d73feb01f52a6199d/'
 const cyclesSource = ruleSource + 'b11240808fefa9a32c03b5b7c81829af379a790e/'
 
+const chapterSources: Record<number, string> = {
+  1: ruleSource + '5894b193fda5648afe1c1a5e70c028f25cd29099/',
+  2: ruleSource + 'a4b879c29ebc2ff9a56a0595499b6eb2dce7980e/',
+  3: specialSource,
+  4: ruleSource + '1736bcf22f8e05f9d3db535f6d084651bad887a4/',
+  5: ruleSource + 'ebac29ce89bbf83c3390095a126a259f746a0cb8/',
+  6: signalsSource,
+  7: ruleSource + '5db7d611e491cc10d20b0f33c6152a6a12b6e298/',
+  8: maneuverSource,
+  9: ruleSource + 'd08dbb6ef3956314fd36b1d54a9393598f057acf/',
+  10: ruleSource + '803907f6876a655f77995888208488d4bfccf247/',
+  11: ruleSource + '00933a31260a2f952961558c8915b2304c0d37a5/',
+  12: ruleSource + '59ded54942baa2143676e12b31244b0cb7ada00d/',
+  13: junctionSource,
+  14: crossingSource,
+  15: ruleSource + '30652b56dc31f25e043cecc891a1b6c6d342b564/',
+  16: ruleSource + 'b9ffeb1a48b4e34db166a077afffcd010f54ccc0/',
+  17: ruleSource + '4a197256b71d80d3468ba394e252f791d3066874/',
+  18: ruleSource + '1d225b4fe43aaefac2b8f54fc0579d997cc402bc/',
+  19: ruleSource + '97740763b8b2b6482c476391e6a2f5fff4204809/',
+  20: ruleSource + '882fa5c9619bb53e0aedce5214dbc06abd8a5a12/',
+  21: ruleSource + 'd2a59b4261d79be841e0f1ce86cb9e7bf4ee4c1a/',
+  22: ruleSource + 'e001362573f4cd17ff27d65968c83cd423459ada/',
+  23: ruleSource + '9f6f60efaee3994438e38b50a90595abfaaaf5a2/',
+  24: cyclesSource,
+}
+
+const signGroupSources: Record<number, string> = {
+  1: ruleSource + 'b284ec5e9ad7be3925387bbb60d7916447e5f3fe/',
+  2: ruleSource + 'f813c443e749db7b760a9fb7729a4e4ccdb2f3ea/',
+  3: ruleSource + 'bf1f4781b8aa1172e9993c89c36db0dcdc88c495/',
+  4: ruleSource + 'cfcce287ebd89cee09dc5b780337286c556b0978/',
+  5: ruleSource + 'abf54a3a53893a59aab95ff7cfb06d2ce2b47435/',
+  6: ruleSource + '8e2220e5b0d5072a22fdce5e3294847b0c673773/',
+  8: ruleSource + 'd507c6724f67c7a6ff27ba125eb7db3e4d36a3a6/',
+}
+
 const sign = (code: string, title: string, text: string, art: string): ReferenceEntry =>
-  ({ code, title, text, group: 'Знаки', source: signsSource, art })
+  ({ code, title, text, group: 'Знаки', source: signGroupSources[Number(code.split('.')[0])] ?? signsSource, art })
 const marking = (code: string, title: string, text: string, art: string): ReferenceEntry =>
   ({ code, title, text, group: 'Разметка', source: markingsSource, art })
 const signal = (code: string, title: string, text: string, group: ReferenceGroup = 'Светофоры'): ReferenceEntry =>
@@ -33,9 +70,11 @@ export const reference: ReferenceEntry[] = [
   sign('3.18.2', 'Поворот налево запрещён', 'Запрещает левый поворот на пересечении проезжих частей, перед которым установлен знак. Сам по себе разворот этот знак не запрещает.', 'no-left'),
   sign('3.20', 'Обгон запрещён', 'Запрещает обгон с оговорёнными в приложении исключениями, например для тихоходных транспортных средств. Запрет пересечения сплошной линии продолжает действовать.', 'no-pass'),
   sign('3.24', 'Ограничение максимальной скорости', 'Запрещает превышать скорость, указанную на знаке. Проверьте зону действия и таблички.', 'speed'),
+  sign('3.28', 'Стоянка запрещена', 'Запрещает стоянку на стороне дороги, где установлен. Для остановки действуют общие правила ПДД. Таблички могут уточнять условия запрета.', 'no-parking'),
   sign('4.1.1', 'Движение прямо', 'Предписывает движение прямо. У знака в начале участка дороги есть отдельные условия действия и исключение для поворота направо на прилегающую территорию.', 'straight'),
   sign('4.3', 'Круговое движение', 'Указывает предписанное направление движения по кругу. При въезде проверьте, является ли ваша дорога главной.', 'roundabout'),
   sign('5.19.1', 'Пешеходный переход', 'Знак справа обозначает ближнюю границу перехода. При отсутствии зебры границы определяются парой знаков 5.19.1 и 5.19.2.', 'crossing'),
+  sign('5.19.2', 'Пешеходный переход', 'При отсутствии разметки этот знак ставят слева на дальней границе перехода относительно приближающегося транспорта.', 'crossing-left'),
   sign('5.21', 'Жилая зона', 'Начало зоны с особыми правилами. Пешеходы могут использовать проезжую часть, а допустимая скорость не превышает 20 км/ч.', 'residential'),
   sign('6.16', 'Стоп-линия', 'Указывает место остановки при запрещающем сигнале светофора или регулировщика.', 'stop-sign'),
   sign('8.13', 'Направление главной дороги', 'Толстая линия на табличке показывает обе ветви главной дороги. При её повороте водители на главной определяют очерёдность между собой по правилам равнозначных дорог.', 'bend'),
@@ -109,4 +148,26 @@ export function normalizeRule(value: string) {
 
 export function referenceByCode(code: string) {
   return reference.find(entry => normalizeRule(entry.code) === normalizeRule(code))
+}
+
+export function ruleLink(referenceCode: string) {
+  const input = referenceCode.trim()
+  const prefix = input.match(/^(знак|табличка|разметка|п\.|пункт)\s+/iu)
+  const qualifier = prefix?.[1].toLocaleLowerCase('ru')
+  const code = input.slice(prefix?.[0].length ?? 0)
+  const requestedGroup = qualifier === 'знак' || qualifier === 'табличка' ? 'Знаки' : qualifier === 'разметка' ? 'Разметка' : undefined
+  const normalized = normalizeRule(requestedGroup ? code : input)
+  const entry = reference.find(item => {
+    if (normalizeRule(item.code) !== normalized) return false
+    if (requestedGroup) return item.group === requestedGroup
+    return !qualifier || (item.group !== 'Знаки' && item.group !== 'Разметка')
+  })
+  const group = requestedGroup ?? entry?.group
+  const isSign = group === 'Знаки'
+  const isMarking = group === 'Разметка'
+  const label = (qualifier === 'табличка' ? 'Табличка ' : isSign ? 'Знак ' : isMarking ? 'Разметка ' : 'ПДД, п. ') + code.replace(/\s+ПДД$/iu, '')
+  const chapter = Number(code.split('.')[0])
+  const href = entry ? '#/spravochnik?pravilo=' + encodeURIComponent(normalized) :
+    isSign ? signGroupSources[chapter] ?? signsSource : isMarking ? markingsSource : chapterSources[chapter] ?? ruleSource
+  return { label, href }
 }

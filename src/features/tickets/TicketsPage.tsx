@@ -3,7 +3,7 @@ import { ArrowRight, ArrowUpRight, BookOpen, Check, LockKeyhole, Search } from '
 import { Button, PageTitle, Track } from '../../components/ui'
 import { ABM_TICKETS, abmQuestionId } from '../../domain/abm-positions'
 import type { Bank } from '../../domain/bank'
-import { practiceBank } from '../../domain/practice-bank'
+import { practiceBank, practiceTicketCount } from '../../domain/practice-bank'
 import type { Progress } from '../../domain/storage'
 
 type Ticket = { number: number; studied: number; best?: number; mistakes: number; state: 'new' | 'working' | 'done' | 'mastered' }
@@ -11,7 +11,7 @@ const labels: Record<Ticket['state'], string> = { new: 'Не начат', workin
 
 export function ticketStates(kind: Bank['kind'], progress: Progress): Ticket[] {
   const byId = new Map(progress.attempts.map(item => [item.questionId, item]))
-  const count = kind === 'official' ? ABM_TICKETS : 2
+  const count = kind === 'official' ? ABM_TICKETS : practiceTicketCount
   return Array.from({ length: count }, (_, i) => {
     const number = i + 1
     const runs = progress.tickets.filter(run => run.kind === kind && run.ticket === number)
@@ -53,15 +53,15 @@ export default function TicketsPage({ official, practiceSelected, progress, read
     {(practiceSelected || !official) && <>
       <section className="panel data-notice">
         <span className="icon-box icon-box--amber"><BookOpen size={21} /></span>
-        <div><h2>Авторская практика</h2><p>40 авторских вопросов в двух учебных билетах.</p></div>
+        <div><h2>Авторская практика</h2><p>{practiceBank.questions.length} вопросов · {practiceTicketCount} учебных билетов</p></div>
         {!official && <a className="text-link" href="#/nastroyki">О комплекте ABM <ArrowUpRight size={15} /></a>}
       </section>
-      <div className="practice-ticket-grid">
-        {ticketStates('practice', progress).map(ticket => <TicketCard key={ticket.number} ticket={ticket} kind="practice" available onOpen={() => onStart(practiceBank, ticket.number)} />)}
-      </div>
       <div className="inline-actions">
         <Button variant="primary" disabled={!ready} onClick={onPractice}>Тренировка на 10 минут <ArrowRight size={17} /></Button>
         <a className="button button--secondary" href="#/ekzamen?komplekt=uchebny">Учебный экзамен</a>
+      </div>
+      <div className="ticket-grid">
+        {ticketStates('practice', progress).map(ticket => <TicketCard key={ticket.number} ticket={ticket} kind="practice" available onOpen={() => onStart(practiceBank, ticket.number)} />)}
       </div>
     </>}
     {!practiceSelected && <>

@@ -113,7 +113,7 @@ export function weakTopics(questions: Question[], history: Attempt[]) {
     .sort((a, b) => b.wrong - a.wrong || (b.wrong / b.total) - (a.wrong / a.total) || a.name.localeCompare(b.name, 'ru'))
 }
 
-export function choosePractice(questions: Question[], history: Attempt[], now: number, limit = 20) {
+export function choosePractice(questions: Question[], history: Attempt[], now: number, limit = 20, random = Math.random) {
   const stats = questionStats(history)
   const weak = new Set(weakTopics(questions, history).slice(0, 3).map(topic => topic.name))
   return questions.map(question => {
@@ -124,6 +124,6 @@ export function choosePractice(questions: Question[], history: Attempt[], now: n
     if (isDue) score += stat?.wrong ? 150 : 95
     if (stat?.wrong) score += Math.min(stat.wrong, 5) * 12
     if (stat?.mastered) score -= 30
-    return { question, score, at: stat?.lastAt ?? 0 }
-  }).sort((a, b) => b.score - a.score || a.at - b.at).slice(0, limit).map(item => item.question)
+    return { question, score, at: stat?.lastAt ?? 0, order: random() }
+  }).sort((a, b) => b.score - a.score || a.at - b.at || a.order - b.order).slice(0, limit).map(item => item.question)
 }

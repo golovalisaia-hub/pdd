@@ -1,7 +1,10 @@
 import type { Bank, Question } from './bank'
+import { ABM_QUESTIONS_PER_TICKET } from './abm-positions'
+import { practiceExtraA } from './practice-extra-a'
+import { practiceExtraB } from './practice-extra-b'
 import { ruleSource } from './reference'
 
-type Exercise = [text: string, options: string[], correct: number, topic: string, rule: string, explanation: string, simple: string, image?: string]
+export type Exercise = [text: string, options: string[], correct: number, topic: string, rule: string, explanation: string, simple: string, image?: string]
 
 const first: Exercise[] = [
   ['На подъезде к нерегулируемому перекрёстку установлен показанный знак. Где нужно остановиться, если нанесена стоп-линия?', ['Перед стоп-линией.', 'За стоп-линией, у края перекрёстка.', 'Достаточно снизить скорость перед линией.'], 0, 'Дорожные знаки', '2.5', 'Знак 2.5 требует полной остановки. При наличии стоп-линии остановитесь перед ней, затем оцените движение на пересекаемой дороге.', 'Сначала полная остановка перед белой линией. Потом проверьте, можно ли безопасно проехать.', '/media/uchebny-stop.svg'],
@@ -49,10 +52,17 @@ const second: Exercise[] = [
   ['В каком месте разворот запрещён даже на свободной дороге?', ['На участке, где прерывистая разметка и хорошая видимость.', 'На пешеходном переходе.', 'На прямом участке без знаков запрета.'], 1, 'Маневрирование', '8.11', 'Пункт 8.11 прямо запрещает разворот на пешеходном переходе.', 'Выберите подходящее место за пределами перехода.'],
 ]
 
+const extra = practiceExtraA.flatMap((exercise, index) => [exercise, practiceExtraB[index]])
+
 export const practiceBank: Bank = {
+  // Новые позиции добавляются в конец, поэтому текущие занятия совместимы с этой версией.
   kind: 'practice', version: 'pdd-2026.11.11', source: ruleSource,
-  questions: [first, second].flatMap((ticket, i) => ticket.map((exercise, j): Question => {
+  questions: [...first, ...second, ...extra].map((exercise, index): Question => {
     const [text, options, correct, topic, rule, explanation, simple, image] = exercise
-    return { id: 'pdd-' + (i + 1) + '-' + (j + 1), ticket: i + 1, position: j + 1, text, options, correct, topic, rules: [rule], explanation, simple, image }
-  })),
+    const ticket = Math.floor(index / ABM_QUESTIONS_PER_TICKET) + 1
+    const position = index % ABM_QUESTIONS_PER_TICKET + 1
+    return { id: `pdd-${ticket}-${position}`, ticket, position, text, options, correct, topic, rules: [rule], explanation, simple, image }
+  }),
 }
+
+export const practiceTicketCount = Math.ceil(practiceBank.questions.length / ABM_QUESTIONS_PER_TICKET)
